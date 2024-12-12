@@ -16,31 +16,23 @@ sz=size(h_G_vec);
 T_vec=nan(sz);
 p_vec=nan(sz);
 for n=1:length(h_G_vec)
-    if h_G_vec(n)>=h_G0_row(1) && h_G_vec(n)<=h_G0_row(2)
-        T_vec(n)=T_0_row(1)+a_0_row(1).*(h_G_vec(n)-h_G0_row(1));
-        p_vec(n)=p_0_row(1).*(T_vec(n)./T_0_row(1)).^(-g_0./a_0_row(1)/R);
-    elseif h_G_vec(n)<=h_G0_row(3)
-        T_vec(n)=T_0_row(2);
-        p_vec(n)=p_0_row(2).*exp(-g_0.*(h_G_vec(n)-h_G0_row(2))./R./T_0_row(2));
-    elseif h_G_vec(n)<=h_G0_row(4)
-        T_vec(n)=T_0_row(3)+a_0_row(2).*(h_G_vec(n)-h_G0_row(3));
-        p_vec(n)=p_0_row(3).*(T_vec(n)./T_0_row(3)).^(-g_0./a_0_row(2)/R);
-    elseif h_G_vec(n)<=h_G0_row(5)
-        T_vec(n)=T_0_row(4);
-        p_vec(n)=p_0_row(4).*exp(-g_0.*(h_G_vec(n)-h_G0_row(4))./R./T_0_row(4));
-    elseif h_G_vec(n)<=h_G0_row(6)
-        T_vec(n)=T_0_row(5)+a_0_row(3).*(h_G_vec(n)-h_G0_row(5));
-        p_vec(n)=p_0_row(5).*(T_vec(n)./T_0_row(5)).^(-g_0./a_0_row(3)/R);
-    elseif h_G_vec(n)<=h_G0_row(7)
-        T_vec(n)=T_0_row(6);
-        p_vec(n)=p_0_row(6).*exp(-g_0.*(h_G_vec(n)-h_G0_row(6))./R./T_0_row(6));
-    elseif h_G_vec(n)<=h_G0_row(8)
-        T_vec(n)=T_0_row(7)+a_0_row(4).*(h_G_vec(n)-h_G0_row(7));
-        p_vec(n)=p_0_row(7).*(T_vec(n)./T_0_row(7)).^(-g_0./a_0_row(4)/R);
-    else
-        error('Input heights are out of range!')
+    if h_G_vec(n)<h_G0_row(1) || h_G_vec(n)>h_G0_row(end)
+        warning("Invalid value in the input. Values must lie in the region ["+h_G0_row(1)+","+h_G0_row(end)+"]");
     end
 
+    for n_layer=1:7
+        if h_G_vec(n)<=h_G0_row(n_layer+1)
+            if rem(n_layer,2)~=0 % n_layer is odd
+                n_a=(n_layer+1)/2;
+                T_vec(n)=T_0_row(n_layer)+a_0_row(n_a).*(h_G_vec(n)-h_G0_row(n_layer));
+                p_vec(n)=p_0_row(n_layer).*(T_vec(n)./T_0_row(n_layer)).^(-g_0./a_0_row(n_a)/R);
+            else % n_layer is even
+                T_vec(n)=T_0_row(n_layer);
+                p_vec(n)=p_0_row(n_layer).*exp(-g_0.*(h_G_vec(n)-h_G0_row(n_layer))./R./T_0_row(n_layer));
+            end
+            break
+        end
+    end
 end
 rho_vec=p_vec./R./T_vec;
 a_vec=sqrt(gamma.*R.*T_vec);
